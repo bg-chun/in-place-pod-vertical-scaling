@@ -1,10 +1,16 @@
 # Background
+## What this feature actually does
+There was no mechanism to update container's resource req/limit in place without re-deploying pod.
+Since resizing resource req/limit means change limit of pod and container's cgroup.
+Seems the fundermantal idea behind this feature is to provide way to resize pod and container's cgroup if it is possible on the node where target pod/container has been bound.
 
 ## What is vertical scaling?
 - TBD
 
 ## Who needs it?
 - seems gke
+
+
 
 # KEP & PR
 - https://github.com/kubernetes/enhancements/commits/master/keps/sig-node/1287-in-place-update-pod-resources
