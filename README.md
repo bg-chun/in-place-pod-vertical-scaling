@@ -1,8 +1,8 @@
 # Background
-## What this feature actually does
+## What this feature actually does?
 There was no mechanism to update container's resource req/limit in place without re-deploying pod.
 Since resizing resource req/limit means change limit of pod and container's cgroup.
-Seems the fundermantal idea behind this feature is to provide way to resize pod and container's cgroup if it is possible on the node where target pod/container has been bound.
+The fundermantal idea behind this feature is to provide way to resize pod and container's cgroup if it is possible on the node where target pod/container has been bound.
 
 ## What is vertical scaling?
 - TBD
@@ -40,6 +40,14 @@ The possible values are Proposed/InProgress/Deferred(delayed)/Infeasible(rejecte
 ## node level changes
 ### Kubelet
 ### CRI
+This feature introduces significant changes on CRI(at least for me).
+
+First, it introduces platform agnostic ContainerResources message type for CRI and make UpdateContainerResource API to use it, which currently take LinuxContainerResources only. New ContaineResources type encapsulates both resource types for linux and windows.
+
+Second, it provides a new machanism to parse current cgroup stats from CRI runtime(containerd/crio/etc) by adding ContainerResourse message type on ContainerStatus message.
+
+
+
 
 
 ### Runtimes
