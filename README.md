@@ -44,7 +44,7 @@ This feature introduces significant changes on CRI(at least for me).
 
 First, it introduces platform agnostic ContainerResources message type for CRI and make UpdateContainerResource API to use it, which currently take LinuxContainerResources only. New ContaineResources type encapsulates both resource types for linux and windows.
 
-Second, it provides a new machanism to parse current cgroup stats from CRI runtime(containerd/crio/etc) by adding ContainerResourse message type on ContainerStatus message.
+Second, it provides a new machanism to parse current cgroup stats of container from CRI runtime(containerd/crio/etc) by adding ContainerResourse message type on ContainerStatus message.
 
 
 
