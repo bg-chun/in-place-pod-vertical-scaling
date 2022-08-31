@@ -35,7 +35,7 @@ But... RestartNotRequired does not gurantee that a container won't be restarted 
 The possible values are Proposed/InProgress/Deferred(delayed)/Infeasible(rejected).
 
 ## API-Server changes
-For pods which has been created with new podSpec, it will set `PodStatus.ResourcesAllocated` field as same as PodSpec.Container.Resources.
+For pods which has been created with new podSpec, it will set `PodStatus.ResourcesAllocated` field as same as `PodSpec.Container.Resources`.
 
 ## Scheduler level changes
 
@@ -45,10 +45,13 @@ For pods which has been created with new podSpec, it will set `PodStatus.Resourc
 At pod admission stage(the moment before starting to create a pod), kubelet will see `PodStatus.ResourceAllocated` field not a PodSpec.Container.Resources.
 
 #### Pod Resizing
-Kubelet will accept resize request if there is enough room for newly requested resources. Sum of resources of pod(including resized resources) would not be greater than amount of allocatable resources.
 
-Once request accepted, kubelet will update `PodStatus.ResourceAllocated` field as same as `PodSpec.Container.Resources` then update `Pod.Status.Resize[]` field to `InProgress`. At the last stage it will make CRI-API call for `UpdateContainerResources`.
+Positive case
+- Kubelet will accept resize request if there is enough room for newly requested resources. Sum of resources of pod(including resized resources) would not be greater than amount of allocatable resources. Once request accepted, kubelet will update `PodStatus.ResourceAllocated` field as same as `PodSpec.Container.Resources` then update `Pod.Status.Resize[]` field to `InProgress`. Then it will make CRI-API call for `UpdateContainerResources`. If CRI Runtime update cgroup for new size successfully, kubelet update `PodStatus.Resources`.
+- if new size is fit to the current node, but resource is not available at that moment, kubelet will set `PodStatus.Resize` field to `Deferred`.
 
+Negative case
+- if new size is not fit to the current node, kubelet will reject resize request by setting `PodStatus.Resize` field to `Infeasible`.
 
 ### CRI
 This feature introduces significant changes on CRI(at least for me).
