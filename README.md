@@ -17,7 +17,7 @@ The fundermantal idea behind this feature is to provide way to resize pod and co
 - https://github.com/kubernetes/kubernetes/pull/102884
 
 # Changes
-## API level changes
+## API changes
 This feature introduces following changes on PodSpec and PodStatus.
 - PodSpec.Container.Resources becomes mutable for CPU and memory resource types.
 - PodSpec.Container.ResizePolicy (new object) gives users control over how their containers are resized.
@@ -34,21 +34,28 @@ But... RestartNotRequired does not gurantee that a container won't be restarted 
 `Pod.Status.Resize[]` field shows that whether kubelet has accepted or rejected a resize request for a particular resource such as cpu and memory.
 The possible values are Proposed/InProgress/Deferred(delayed)/Infeasible(rejected).
 
+## API-Server changes
+For pods which has been created with new podSpec, it will set `PodStatus.ResourcesAllocated` field as same as PodSpec.Container.Resources.
 
 ## Scheduler level changes
 
 ## node level changes
 ### Kubelet
+#### Pod admission stage
+At pod admission stage(the moment before starting to create a pod), kubelet will see `PodStatus.ResourceAllocated` field not a PodSpec.Container.Resources.
+
+#### Pod Resizing
+Kubelet will accept resize request if there is enough room for newly requested resources. Sum of resources of pod(including resized resources) would not be greater than amount of allocatable resources.
+
+Once request accepted, kubelet will update `PodStatus.ResourceAllocated` field as same as `PodSpec.Container.Resources` then update `Pod.Status.Resize[]` field to `InProgress`. At the last stage it will make CRI-API call for `UpdateContainerResources`.
+
+
 ### CRI
 This feature introduces significant changes on CRI(at least for me).
 
 First, it introduces platform agnostic ContainerResources message type for CRI and make UpdateContainerResource API to use it, which currently take LinuxContainerResources only. New ContaineResources type encapsulates both resource types for linux and windows.
 
 Second, it provides a new machanism to parse current cgroup stats of container from CRI runtime(containerd/crio/etc) by adding ContainerResourse message type on ContainerStatus message.
-
-
-
-
 
 ### Runtimes
 
